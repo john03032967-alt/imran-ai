@@ -51,8 +51,7 @@ export default {
       });
     }
    // Chat
-    if (path === "/chat" && request.method === "POST") {
-
+   if (path === "/chat") {
       const body = await request.json().catch(() => ({}));
 
       if (!body.message) {
