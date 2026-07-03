@@ -1,56 +1,47 @@
-import { CONFIG } from "./config.js";
-import { success, failure } from "./utils.js";
+export const Brain = {
+  async chat(message, env) {
+    if (!env.GEMINI_API_KEY) {
+      return {
+        success: false,
+        reply: "Gemini API Key not found."
+      };
+    }
 
-export async function chat(env, message) {
-
-  if (!message) {
-    return failure("Message is required");
-  }
-
-  const prompt = `
-You are ${CONFIG.APP_NAME}.
-
-Owner: ${CONFIG.OWNER}
-
-You are a smart personal AI assistant.
-
-Rules:
-- Reply naturally.
-- Support Urdu, Hindi and English.
-- Be helpful.
-- Keep answers clear.
-- If user greets you, greet back.
-`;
-
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${CONFIG.MODEL}:generateContent?key=${env.GEMINI_API_KEY}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${env.GEMINI_API_KEY}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            contents: [
               {
-                text: prompt + "\n\nUser: " + message
+                parts: [
+                  {
+                    text: message
+                  }
+                ]
               }
             ]
-          }
-        ]
-      })
+          })
+        }
+      );
+
+      const data = await response.json();
+
+      return {
+        success: true,
+        reply:
+          data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+          "No response from Gemini."
+      };
+    } catch (error) {
+      return {
+        success: false,
+        reply: error.message
+      };
     }
-  );
-
-  const data = await response.json();
-
-  const reply =
-    data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-    "I couldn't generate a reply.";
-
-  return success({
-    reply
-  });
-}
+  }
+};
