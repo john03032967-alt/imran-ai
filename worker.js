@@ -23,13 +23,9 @@ export default {
 
     // Home
     if (path === "/") {
-      return successResponse({
-        app: CONFIG.APP_NAME,
-        version: CONFIG.VERSION,
-        owner: CONFIG.OWNER,
-        status: "online",
-        time: now()
-      });
+  return successResponse({
+    message: "NEW CODE WORKING"
+  });
     }
 
     // Status
