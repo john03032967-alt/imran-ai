@@ -1,43 +1,25 @@
-const contacts = [];
+export const Contacts = {
+  list: [],
 
-export function addContact(name, phone) {
+  add(contact) {
+    this.list.push(contact);
+    return contact;
+  },
 
-  contacts.push({
-    id: crypto.randomUUID(),
-    name,
-    phone,
-    createdAt: new Date().toISOString()
-  });
+  getAll() {
+    return this.list;
+  },
 
-  return {
-    success: true
-  };
-}
+  find(name) {
+    return this.list.find(
+      c => c.name.toLowerCase() === name.toLowerCase()
+    );
+  },
 
-export function getContacts() {
-  return contacts;
-}
-
-export function findContact(name) {
-
-  return contacts.find(contact =>
-    contact.name.toLowerCase() ===
-    name.toLowerCase()
-  );
-
-}
-
-export function deleteContact(id) {
-
-  const index = contacts.findIndex(
-    contact => contact.id === id
-  );
-
-  if (index !== -1) {
-    contacts.splice(index, 1);
+  remove(name) {
+    this.list = this.list.filter(
+      c => c.name.toLowerCase() !== name.toLowerCase()
+    );
+    return true;
   }
-
-  return {
-    success: true
-  };
-}
+};
