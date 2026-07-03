@@ -1,61 +1,82 @@
 import { CONFIG } from "./config.js";
-import { jsonResponse } from "./utils.js";
 import { Brain } from "./brain.js";
 import { Memory } from "./memory.js";
 import { Contacts } from "./contacts.js";
+import {
+  jsonResponse,
+  errorResponse,
+  successResponse,
+  now
+} from "./utils.js";
 
 export default {
   async fetch(request, env) {
+
     const url = new URL(request.url);
+    const path = url.pathname;
+
+    if (request.method === "OPTIONS") {
+      return jsonResponse({
+        success: true
+      });
+    }
 
     // Home
-    if (url.pathname === "/") {
-      return jsonResponse({
-        success: true,
+    if (path === "/") {
+      return successResponse({
         app: CONFIG.APP_NAME,
         version: CONFIG.VERSION,
         owner: CONFIG.OWNER,
-        status: "online"
+        status: "online",
+        time: now()
       });
     }
 
     // Status
-    if (url.pathname === "/status") {
-      return jsonResponse({
-        success: true,
-        status: "online",
-        model: CONFIG.MODEL
+    if (path === "/status") {
+      return successResponse({
+        online: true,
+        model: CONFIG.MODEL,
+        time: now()
       });
     }
 
-    // Chat (placeholder)
-    if (url.pathname === "/chat") {
-      return jsonResponse({
-        success: true,
-        message: "Chat endpoint ready.",
-        reply: "Assalamualaikum! Main Imran AI hoon."
+    // Memory
+    if (path === "/memory") {
+      return successResponse({
+        memory: Memory.all()
       });
     }
 
-    // Memory (placeholder)
-    if (url.pathname === "/memory") {
-      return jsonResponse({
-        success: true,
-        data: Memory
+    // Contacts
+    if (path === "/contacts") {
+      return successResponse({
+        contacts: Contacts.getAll()
+      });
+    }
+   // Chat
+    if (path === "/chat" && request.method === "POST") {
+
+      const body = await request.json().catch(() => ({}));
+
+      if (!body.message) {
+        return errorResponse("Message is required.");
+      }
+
+      Memory.add("user", body.message);
+
+      const ai = await Brain.chat(body.message, env);
+
+      Memory.add("assistant", ai.reply);
+
+      return successResponse({
+        reply: ai.reply,
+        success: ai.success,
+        history: Memory.all()
       });
     }
 
-    // Contacts (placeholder)
-    if (url.pathname === "/contacts") {
-      return jsonResponse({
-        success: true,
-        data: Contacts
-      });
-    }
+    return errorResponse("Route not found.", 404);
 
-    return jsonResponse({
-      success: false,
-      error: "Route not found"
-    }, 404);
   }
-};
+}; 
