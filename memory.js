@@ -1,25 +1,20 @@
-const memory = new Map();
+export const Memory = {
+  messages: [],
 
-export function saveMemory(key, value) {
-  memory.set(key, value);
+  add(role, text) {
+    this.messages.push({
+      role,
+      text,
+      time: new Date().toISOString()
+    });
+  },
 
-  return {
-    success: true
-  };
-}
+  all() {
+    return this.messages;
+  },
 
-export function getMemory(key) {
-  return memory.get(key) || null;
-}
-
-export function getAllMemory() {
-  return Object.fromEntries(memory);
-}
-
-export function clearMemory() {
-  memory.clear();
-
-  return {
-    success: true
-  };
-}
+  clear() {
+    this.messages = [];
+    return true;
+  }
+};
