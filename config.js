@@ -14,6 +14,7 @@ export const CONFIG = {
     CHAT: "/chat",
     STATUS: "/status",
     MEMORY: "/memory",
+    CLEAR_MEMORY: "/clear-memory",
     CONTACTS: "/contacts",
     VOICE: "/voice",
     CALLS: "/calls",
