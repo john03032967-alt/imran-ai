@@ -43,7 +43,16 @@ export default {
         memory: Memory.all()
       });
     }
+   // Clear Memory
+if (path === "/clear-memory") {
 
+  Memory.clear();
+
+  return successResponse({
+    message: "Memory cleared successfully."
+  });
+
+}
     // Contacts
     if (path === "/contacts") {
       return successResponse({
