@@ -38,15 +38,21 @@ export default {
     }
 
     // Memory
-    if (path === "/memory") {
-      return successResponse({
-        memory: Memory.all()
-      });
-    }
+if (path === "/memory") {
+
+  const memory = new Memory(env);
+
+  return successResponse({
+    memory: await memory.all("default")
+  });
+
+}
    // Clear Memory
 if (path === "/clear-memory") {
 
-  Memory.clear();
+  const memory = new Memory(env);
+
+  await memory.clear("default");
 
   return successResponse({
     message: "Memory cleared successfully."
@@ -67,16 +73,21 @@ if (path === "/clear-memory") {
         return errorResponse("Message is required.");
       }
 
-      Memory.add("user", body.message);
+      const memory = new Memory(env);
 
-      const brain = new Brain(env);
-const reply = await brain.chat(body.message);
-      Memory.add("assistant", reply);
+await memory.add("default", "user", body.message);
+
+const brain = new Brain(env);
+const history = await memory.all("default");
+
+const reply = await brain.chat(body.message, history);
+
+await memory.add("default", "assistant", reply);
 
 return successResponse({
   reply,
   success: true,
-  history: Memory.all()
+  history: await memory.all("default")
 });
     }
 
