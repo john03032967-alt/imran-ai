@@ -1,4 +1,4 @@
-name = "imran-ai"
+name = "imran-ai-v2"
 main = "worker.js"
 compatibility_date = "2026-07-03"
 
