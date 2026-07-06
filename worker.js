@@ -60,15 +60,15 @@ export default {
 
       Memory.add("user", body.message);
 
-      const ai = await Brain.chat(body.message, env);
+      const brain = new Brain(env);
+const reply = await brain.chat(body.message);
+      Memory.add("assistant", reply);
 
-      Memory.add("assistant", ai.reply);
-
-      return successResponse({
-        reply: ai.reply,
-        success: ai.success,
-        history: Memory.all()
-      });
+return successResponse({
+  reply,
+  success: true,
+  history: Memory.all()
+});
     }
 
     return errorResponse("Route not found.", 404);
