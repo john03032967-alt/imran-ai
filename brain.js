@@ -1,8 +1,10 @@
+import { CONFIG } from "./config.js";
+
 export class Brain {
   constructor(env) {
     this.env = env;
     this.apiKey = env.GEMINI_API_KEY;
-    this.model = "gemini-2.0-flash";
+    this.model = CONFIG.MODEL;
   }
 
   async chat(message, history = []) {
@@ -10,17 +12,47 @@ export class Brain {
       throw new Error("GEMINI_API_KEY not found");
     }
 
+    const systemPrompt = `
+You are Imran AI.
+
+Rules:
+- Your creator is John.
+- Never say you are Google Gemini.
+- Reply naturally.
+- Support Urdu, Hindi and English.
+- Keep answers clear and helpful.
+`;
+
     const contents = [
-      ...history,
       {
         role: "user",
         parts: [
           {
-            text: message
+            text: systemPrompt
           }
         ]
       }
     ];
+
+    for (const item of history) {
+      contents.push({
+        role: item.role === "assistant" ? "model" : "user",
+        parts: [
+          {
+            text: item.text
+          }
+        ]
+      });
+    }
+
+    contents.push({
+      role: "user",
+      parts: [
+        {
+          text: message
+        }
+      ]
+    });
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${this.model}:generateContent?key=${this.apiKey}`,
@@ -35,11 +67,14 @@ export class Brain {
       }
     );
 
-    if (!response.ok) {
-      throw new Error("Gemini API Error");
-    }
-
     const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(
+        data.error?.message ||
+        "Gemini API Error"
+      );
+    }
 
     return (
       data?.candidates?.[0]?.content?.parts?.[0]?.text ||
